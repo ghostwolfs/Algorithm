@@ -1,5 +1,7 @@
 import numpy as np
 
+
+# dynamic planning
 def min_distance_edit(a, b):    
     if len(a) == 0:
         return len(b)
@@ -22,3 +24,19 @@ def min_distance_edit(a, b):
                 case3 = matrix[i-1][j-1] + 1
                 matrix[i][j] = min(case1, case2, case3) 
     return matrix[len(a)][len(b)]
+
+
+# recursive
+def min_distance_edit(a, b, lenA, lenB):
+    if lenA == 0:
+        return lenB
+    if lenB == 0:
+        return lenA
+    
+    if a[lenA-1] == b[lenB-1]:
+        return min_distance_edit(a, b, lenA-1, lenB-1)
+    else:
+        case1 = min_distance_edit(a, b, lenA-1, lenB) + 1
+        case2 = min_distance_edit(a, b, lenA, lenB-1) + 1
+        case3 = min_distance_edit(a, b, lenA-1, lenB-1) + 1
+        return min(case1, case2, case3)
