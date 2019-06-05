@@ -8,7 +8,7 @@ def timethis(func):
         start = time.perf_counter()
         r = func(*args, **kwargs)
         end = time.perf_counter()
-        print('{}.{} : {}'.format(func.__module__, func.__name__, end - start))
+        print('{} {}: {}'.format(func.__name__, ' cost', end - start))
         return r
     return wrapper
 
@@ -28,10 +28,10 @@ for line in line_list:
 
 # node.sort()
 node_lenth = max(node)
-print(node_lenth)
+# print(node_lenth)
 
 @timethis
-def aaa():
+def diameter_floyd():
 	links_matrix = np.full((node_lenth, node_lenth), 1000)
 	links_matrix.astype(np.int64)
 	for line in line_list:
@@ -54,6 +54,54 @@ def aaa():
 			for j in range(0, node_lenth):
 				distance_matrix[i][j] = min(distance_matrix[i][j], distance_matrix[i][k]+distance_matrix[k][j])
 
-	print(distance_matrix.max())
-aaa()
+	diameter = 0
+	for i in range(node_lenth):
+		for j in range(node_lenth):
+			if distance_matrix[i][j] > diameter and distance_matrix[i][j] != 1000:
+				diameter = distance_matrix[i][j]
+
+	print('the diameter computed by floyd algorthim: ', diameter)
+diameter_floyd()
+
+@timethis
+def diameter_korder():
+	links_matrix = np.full((node_lenth, node_lenth), 0)
+	links_matrix.astype(np.int8)
+	for line in line_list:
+		line = line.rstrip().split(' ')
+		node_one = int(line[0]) - 1
+		node_two = int(line[1]) - 1
+		links_matrix[node_one][node_two] = 1
+		links_matrix[node_two][node_one] = 1
+
+	for index in range(node_lenth):
+		links_matrix[index][index] = 0
+
+	distance_matrix = np.copy(links_matrix) # C1
+	k_distance_matrix = np.copy(links_matrix) # D
+	temp_matrix = np.copy(links_matrix) # C2
+	# print(k_distance_matrix)
+
+	for k in range(1, node_lenth+1):
+		temp_matrix = temp_matrix.dot(distance_matrix)
+		current_matrix = np.zeros((node_lenth, node_lenth), dtype=np.int64)
+		for i in range(0, node_lenth):
+			for j in range(0, node_lenth):
+				if k_distance_matrix[i][j] > 0:
+					current_matrix[i][j] = k_distance_matrix[i][j]
+				elif (k_distance_matrix[i][j] == 0) and (temp_matrix[i][j] > 0) and (i != j):
+					current_matrix[i][j] = k+1
+
+		# print(k_distance_matrix)
+		# print(temp_matrix)
+		# print(current_matrix)
+		if (current_matrix == k_distance_matrix).all():
+			print('the daimeter computed by k-order-distance matrix: ',k)
+			break
+		else:
+			del k_distance_matrix
+			k_distance_matrix = np.copy(current_matrix)
+diameter_korder()
+
+
 # print(distance_matrix)
